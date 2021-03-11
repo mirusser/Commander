@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Project documentation/user credentials for sql server.txt
+/appsettings.json
