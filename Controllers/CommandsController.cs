@@ -33,7 +33,10 @@ namespace Commander.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<CommandReadDto>> GetAllCommands()
         {
-            var commandItems = repository.GetAllCommands();
+            // var commandItems = repository.GetAllCommands();
+
+            var mockRepo = new MockCommanderRepo();
+            var commandItems = mockRepo.GetAllCommands();
 
             var commandReadDtos = mapper.Map<IEnumerable<CommandReadDto>>(commandItems);
 

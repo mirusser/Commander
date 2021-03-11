@@ -1,0 +1,87 @@
+1. after installing docker and updating linux kernel, command in ps: wsl --set-default-version 2 
+
+2.search on windows: 'manage user certificates' ('Zarządzaj certyfikatami użytkowników')
+
+3. to trust certificate: dotnet dev-certs https --trust
+
+4.how to dockerfile for an asp.net core application
+link: 'https://docs.docker.com/engine/examples/dotnetcore/'
+
+- Create a Dockerfile in your project folder.
+- Add the text below to your Dockerfile for either Linux or Windows Containers. The tags below are multi-arch meaning they pull either Windows or Linux containers depending on what mode is set in Docker Desktop for Windows. Read more on switching containers.
+- The Dockerfile assumes that your application is called aspnetapp. Change the Dockerfile to use the DLL file of your project.
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
+WORKDIR /app
+
+
+COPY *.csproj ./
+RUN dotnet restore
+
+
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+WORKDIR /app
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "aspnetapp.dll"]
+
+- To make your build context as small as possible add a .dockerignore file to your project folder and copy the following into it.
+
+bin/
+obj/
+
+5.build docker image: docker build -t appname .
+
+6. to run created docker image: docker run appname
+
+7. to run created docker image on external port: docker run -p 8080:80 appname
+
+8. stop running docker and start the same container: 
+docker ps 
+docker stop containerid
+docker start containerid
+
+9.create certificate: dotnet dev-certs https -ep $env:USERPROFILE\.aspnet\https\appname.pfx -p P@ssword1
+
+10. Trust the dev certificate: dotnet dev-certs https --trust
+
+11. create user secrtets, in appname.csproj put this:
+<PropertyGroup>
+    ...
+    <UserSecretsId>637b4558-00af-4317-b7ae-6262e25ba14a</UserSecretsId>
+</PropertyGroup>
+
+then in project directory:
+dotnet user-secrets set "Kestrel:Certificates:Development:Password" "P@ssword1"
+
+(secrects are stored in: C:\Users\USER\AppData\Roaming\Microsoft\UserSecrets), look for the one with the name set to be the same as the UserSecretsId that is in appname.csproj
+
+12. run at the command line: docker run -p 8080:80 -p 8081:443 -e ASPNETCORE_URLS="https://+;http://+" -e ASPNETCORE_HTTPS_PORT=8081 -e ASPNETCORE_ENVIRONMENT=Development -v $env:APPDATA\microsoft\UserSecrets\:/root/.microsoft/usersecrets -v $env:USERPROFILE\.aspnet\https:/root/.aspnet/https commander
+
+-----DOCKER COMPOSE-----
+
+13. create new file: docker-compose.yaml
+
+14. in the 'docker-compose.yaml' put thi lines (spacing/tabbing is important):
+version: '3'
+services: 
+  commander:
+    build: .
+    ports: 
+    - "8080:80"
+    - "8081:443"
+    environment: 
+      ASPNETCORE_URLS: "https://+;http://+"
+      ASPNETCORE_HTTPS_PORT: "8081"
+      ASPNETCORE_ENVIRONMENT: "Development"
+    volumes: 
+      - ${APPDATA}\microsoft\UserSecrets\:/root/.microsoft/usersecrets
+      - ${USERPROFILE}\.aspnet\https:/root/.aspnet/https
+
+15. To build image with compose and run: docker-compose up --build
+
+16. Important info: the capitalisation of the certificate name must mach the dll name in Dockerifile (its case sensitive)
+
