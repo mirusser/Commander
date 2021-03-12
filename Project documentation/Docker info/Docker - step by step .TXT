@@ -11,18 +11,19 @@ link: 'https://docs.docker.com/engine/examples/dotnetcore/'
 - Add the text below to your Dockerfile for either Linux or Windows Containers. The tags below are multi-arch meaning they pull either Windows or Linux containers depending on what mode is set in Docker Desktop for Windows. Read more on switching containers.
 - The Dockerfile assumes that your application is called aspnetapp. Change the Dockerfile to use the DLL file of your project.
 
+#Get base SDK Image from Microsoft
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
 WORKDIR /app
 
-
+#Copy the csproj file and restore any dependecies (via NUGER)
 COPY *.csproj ./
 RUN dotnet restore
 
-
+#Copy the project file and build our release
 COPY . ./
 RUN dotnet publish -c Release -o out
 
-
+#Generate runtime image
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 WORKDIR /app
 COPY --from=build-env /app/out .
@@ -34,6 +35,7 @@ bin/
 obj/
 
 5.build docker image: docker build -t appname .
+(note that the '.' a at the end of the command)
 
 6. to run created docker image: docker run appname
 
@@ -84,4 +86,10 @@ services:
 15. To build image with compose and run: docker-compose up --build
 
 16. Important info: the capitalisation of the certificate name must mach the dll name in Dockerifile (its case sensitive)
+
+17. Create remote repository on docker hub: docker push your_docker_id/appname
+
+ANOTHER USEFUL STUFF
+18. Check docker version: docker --version
+19. List all of images on your system: docker images
 
