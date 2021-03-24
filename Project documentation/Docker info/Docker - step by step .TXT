@@ -15,7 +15,7 @@ link: 'https://docs.docker.com/engine/examples/dotnetcore/'
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
 WORKDIR /app
 
-#Copy the csproj file and restore any dependecies (via NUGER)
+#Copy the csproj file and restore any dependecies (via NUGET)
 COPY *.csproj ./
 RUN dotnet restore
 
