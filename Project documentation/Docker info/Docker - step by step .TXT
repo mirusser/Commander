@@ -35,7 +35,7 @@ bin/
 obj/
 
 5.build docker image: docker build -t appname .
-(note that the '.' a at the end of the command)
+(note that the '.' a at the end of the command and the appname must be all lowercase)
 
 6. to run created docker image: docker run appname
 
